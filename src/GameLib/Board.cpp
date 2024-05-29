@@ -131,7 +131,7 @@ bool Board::PlayerWon(GameType type, BoardCellState playerCellState) const
 
 std::optional<Line> Board::FindLine(const BoardCellState state, uint8_t minLength) const
 {
-    if (!m_width || !m_height || (m_width < minLength && m_height <= minLength))
+    if (!m_width || !m_height || (m_width < minLength && m_height < minLength))
         return std::nullopt;
 
     uint16_t idx = 0;
