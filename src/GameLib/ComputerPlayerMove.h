@@ -16,6 +16,7 @@ public:
 private:
     std::optional<Point> FindGoodMove();
     int CalcMoveScore(const Point& movePos, BoardCellState thisMovePlayer, Rect curBRect, int curDepth);
+    std::optional<int> GetMoveWinScore(const Point& movePos, BoardCellState thisMovePlayer, int curDepth) const;
 
 private:
     const std::shared_ptr<Board> m_board;

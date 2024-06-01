@@ -95,51 +95,11 @@ std::optional<Point> ComputerPlayerMove::FindGoodMove()
 
 int ComputerPlayerMove::CalcMoveScore(const Point& movePos, BoardCellState thisMovePlayer, Rect curBRect, int curDepth)
 {
-    const int WinningScore = m_maxDepth + 1;
+    // Implementation is based on Minimax algorithm
 
-    auto& board = *m_board;
-
-    const uint8_t width = board.Columns();
-    const uint8_t height = board.Rows();
-
-    // TODO: move to function
     // Check if this move wins the game
-    for (auto lineDir : { LineDirection::Right, LineDirection::RightDown, LineDirection::Down, LineDirection::LeftDown }) {
-        const auto [incrX, incrY] = DirectionPosIncrement(lineDir);
-
-        int len = 1;
-
-        // First go in checked line direction
-        for (int offset = 1; offset < m_lineLengthToWin; ++offset)
-        {
-            const int curX = movePos.x + incrX*offset;
-            const int curY = movePos.y + incrY*offset;
-            if (curX < 0 || curX >= width ||
-                curY < 0 || curY >= height ||
-                board.GetCell({ static_cast<uint8_t>(curX), static_cast<uint8_t>(curY) }) != thisMovePlayer)
-                break;
-            ++len;
-        }
-
-        //Then go in the opposite direction
-        for (int offset = 1; offset < m_lineLengthToWin; ++offset)
-        {
-            const int curX = movePos.x - incrX*offset;
-            const int curY = movePos.y - incrY*offset;
-            if (curX < 0 || curX >= width ||
-                curY < 0 || curY >= height ||
-                board.GetCell({ static_cast<uint8_t>(curX), static_cast<uint8_t>(curY) }) != thisMovePlayer)
-                break;
-            ++len;
-        }
-
-        if (len >= m_lineLengthToWin)
-        {
-            // The move actually wins the game for this player
-            int score = WinningScore - curDepth;
-            return m_player == thisMovePlayer ? score : -score;
-        }
-    }
+    if (auto thisMoveScore = GetMoveWinScore(movePos, thisMovePlayer, curDepth))
+        return *thisMoveScore;
 
     if (curDepth >= m_maxDepth)
         return 0; // Max Depth reached
@@ -147,6 +107,7 @@ int ComputerPlayerMove::CalcMoveScore(const Point& movePos, BoardCellState thisM
     // This move does not win the game.
     // So do the next move for opponent
 
+    auto& board = *m_board;
     board.SetCell(movePos, thisMovePlayer); // Make move
     curBRect.IncludePoint(movePos);
 
@@ -178,4 +139,54 @@ int ComputerPlayerMove::CalcMoveScore(const Point& movePos, BoardCellState thisM
     board.ClearCell(movePos); // Undo move
 
     return (bestScore == initScore) ? 0 : bestScore;
+}
+
+std::optional<int> ComputerPlayerMove::GetMoveWinScore(const Point& movePos, BoardCellState thisMovePlayer, int curDepth) const
+{
+    const int WinningScore = m_maxDepth + 1;
+
+    auto& board = *m_board;
+
+    const uint8_t width = board.Columns();
+    const uint8_t height = board.Rows();
+
+    for (auto lineDir : { LineDirection::Right, LineDirection::RightDown, LineDirection::Down, LineDirection::LeftDown }) {
+        const auto [incrX, incrY] = DirectionPosIncrement(lineDir);
+
+        int len = 1;
+
+        // First go in checked line direction
+        for (int offset = 1; offset < m_lineLengthToWin; ++offset)
+        {
+            const int curX = movePos.x + incrX*offset;
+            const int curY = movePos.y + incrY*offset;
+            if (curX < 0 || curX >= width ||
+                curY < 0 || curY >= height ||
+                board.GetCell({ static_cast<uint8_t>(curX), static_cast<uint8_t>(curY) }) != thisMovePlayer)
+                break;
+            ++len;
+        }
+
+        // Then go in the opposite direction
+        for (int offset = 1; offset < m_lineLengthToWin; ++offset)
+        {
+            const int curX = movePos.x - incrX*offset;
+            const int curY = movePos.y - incrY*offset;
+            if (curX < 0 || curX >= width ||
+                curY < 0 || curY >= height ||
+                board.GetCell({ static_cast<uint8_t>(curX), static_cast<uint8_t>(curY) }) != thisMovePlayer)
+                break;
+            ++len;
+        }
+
+        if (len >= m_lineLengthToWin)
+        {
+            // The move actually wins the game for this player
+            int score = WinningScore - curDepth;
+            return m_player == thisMovePlayer ? score : -score;
+        }
+    }
+
+    // This move does not win the game.
+    return std::nullopt;
 }
