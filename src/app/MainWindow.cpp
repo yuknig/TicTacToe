@@ -58,10 +58,10 @@ void MainWindow::NewGamePressed()
         return;
     }
 
-    auto dialog = std::make_unique<NewGameDialog>(this);
-    if (dialog->exec() == QDialog::Accepted)
+    NewGameDialog dialog(this);
+    if (dialog.exec() == QDialog::Accepted)
     {
-        const auto settings = dialog->GetSettings();
+        const auto settings = dialog.GetSettings();
 
         if (settings.m_gameType == GameType::FiveInRow && (settings.m_players[0] == PlayerType::Computer || settings.m_players[1] == PlayerType::Computer))
         {
