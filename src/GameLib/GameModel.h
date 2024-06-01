@@ -24,7 +24,6 @@ public:
 
     GameState GetState() const;
     bool IsMoveState() const;
-    bool IsWonState() const;
     std::optional<uint8_t> GetCurrentMovePlayerId() const;
 
 private:

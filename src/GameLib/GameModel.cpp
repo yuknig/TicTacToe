@@ -77,12 +77,6 @@ bool GameModel::IsMoveState() const
            m_state == GameState::MoveO;
 }
 
-bool GameModel::IsWonState() const
-{
-    return m_state == GameState::WonX ||
-           m_state == GameState::WonO;
-}
-
 std::optional<uint8_t> GameModel::GetCurrentMovePlayerId() const
 {
     switch (m_state)

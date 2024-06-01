@@ -76,9 +76,10 @@ void BoardWidget::paintEvent(QPaintEvent* event)
     // Cross out winning sequence
     if (auto model = m_model.lock())
     {
-        if (model->IsWonState())
+        const GameState state = model->GetState();
+        if (state == GameState::WonX ||
+            state == GameState::WonO)
         {
-            const GameState state = model->GetState();
             const BoardCellState winnerCellState = state == GameState::WonX ? BoardCellState::X : BoardCellState::O;
             const int lengthToWin = GetLineLengthToWin(model->GetGameType());
             if (auto line = board->FindLine(winnerCellState, lengthToWin))
